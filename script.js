@@ -189,3 +189,69 @@ for(let i=-4;i<=4;i+=2){
     ark.add(windowBox);
 
 }
+// =====================================
+// ESCONDE A TELA DE CARREGAMENTO
+// =====================================
+
+document.getElementById("loading").style.display = "none";
+
+// =====================================
+// ANIMAÇÃO
+// =====================================
+
+const clock = new THREE.Clock();
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    const time = clock.getElapsedTime();
+
+    // Ondas do oceano
+    const position = water.geometry.attributes.position;
+
+    for (let i = 0; i < position.count; i++) {
+
+        const x = position.getX(i);
+        const y = position.getY(i);
+
+        const wave =
+            Math.sin((x + time * 3) * 0.08) * 0.25 +
+            Math.cos((y + time * 2) * 0.08) * 0.25;
+
+        position.setZ(i, wave);
+
+    }
+
+    position.needsUpdate = true;
+
+    water.geometry.computeVertexNormals();
+
+    // Arca flutuando
+    ark.position.y = Math.sin(time * 1.5) * 0.35;
+
+    // Balanço lateral
+    ark.rotation.z = Math.sin(time * 1.2) * 0.03;
+
+    // Pequeno balanço para frente
+    ark.rotation.x = Math.cos(time * 1.5) * 0.015;
+
+    renderer.render(scene, camera);
+
+}
+
+animate();
+
+// =====================================
+// REDIMENSIONAMENTO
+// =====================================
+
+window.addEventListener("resize", () => {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+});
