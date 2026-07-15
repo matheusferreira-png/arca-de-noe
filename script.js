@@ -18,7 +18,8 @@ window.innerWidth / window.innerHeight,
 1000
 );
 
-camera.position.set(0, 12, 45);
+camera.position.set(0, 18, 70);
+camera.lookAt(0, 7, 0);
 
 // ===========================
 // RENDER
@@ -152,7 +153,7 @@ ark.add(hull);
 
 const deck = new THREE.Mesh(
 
-    new THREE.BoxGeometry(11.5,0.4,32),
+    new THREE.BoxGeometry(10.2,0.35,31),
 
     new THREE.MeshPhongMaterial({
         color:0xC68642
@@ -170,7 +171,7 @@ ark.add(deck);
 
 const cabin = new THREE.Mesh(
 
-    new THREE.BoxGeometry(5.5,3.5,13),
+    new THREE.BoxGeometry(4.5,3.2,11),
 
     new THREE.MeshPhongMaterial({
         color:0x8A5A2B
