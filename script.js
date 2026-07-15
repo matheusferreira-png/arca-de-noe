@@ -75,6 +75,38 @@ scene.add(ark);
 // =====================================
 // CASCO
 // =====================================
+const hullShape = new THREE.Shape();
+
+hullShape.moveTo(-3.5,0);
+hullShape.quadraticCurveTo(-7,1,-7,4);
+hullShape.quadraticCurveTo(-7,7,-4,8);
+hullShape.lineTo(4,8);
+hullShape.quadraticCurveTo(7,7,7,4);
+hullShape.quadraticCurveTo(7,1,3.5,0);
+hullShape.closePath();
+
+const hullGeometry = new THREE.ExtrudeGeometry(hullShape,{
+    depth:34,
+    bevelEnabled:true,
+    bevelThickness:0.2,
+    bevelSize:0.2,
+    bevelSegments:3
+});
+
+const hullMaterial = new THREE.MeshPhongMaterial({
+    color:0x7A4A21
+});
+
+const hull = new THREE.Mesh(
+    hullGeometry,
+    hullMaterial
+);
+
+hull.rotation.x = Math.PI;
+hull.rotation.y = Math.PI;
+hull.position.set(0,8,17);
+
+ark.add(hull);
 // =====================================
 // CASCO DA ARCA (mais realista)
 // =====================================
