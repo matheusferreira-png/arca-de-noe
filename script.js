@@ -1,6 +1,5 @@
 /**
- * SISTEMA DE CARREGAMENTO BLINDADO (Auto-Loader)
- * Garante que o Three.js e OrbitControls carreguem mesmo se o HTML estiver desatualizado.
+ * SISTEMA DE CARREGAMENTO AUTO-LOADER PARA O GITHUB PAGES
  */
 (function() {
     const THREE_CDN = "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";
@@ -11,30 +10,9 @@
         script.type = "text/javascript";
         script.src = url;
         script.onload = callback;
-        script.onerror = () => {
-            console.error("Falha ao carregar: " + url);
-            mostrarErroTela("Erro de conexão ao carregar bibliotecas 3D. Verifique sua internet.");
-        };
         document.head.appendChild(script);
     }
 
-    function mostrarErroTela(msg) {
-        const errDiv = document.createElement("div");
-        errDiv.style.position = "fixed";
-        errDiv.style.top = "50%";
-        errDiv.style.left = "50%";
-        errDiv.style.transform = "translate(-50%, -50%)";
-        errDiv.style.background = "rgba(255, 0, 0, 0.9)";
-        errDiv.style.color = "white";
-        errDiv.style.padding = "20px";
-        errDiv.style.borderRadius = "10px";
-        errDiv.style.zIndex = "99999";
-        errDiv.style.fontFamily = "sans-serif";
-        errDiv.innerHTML = "<b>Erro:</b> " + msg;
-        document.body.appendChild(errDiv);
-    }
-
-    // Inicia o fluxo de carregamento seguro
     if (typeof THREE === "undefined") {
         loadScript(THREE_CDN, () => {
             loadScript(CONTROLS_CDN, iniciarExperiencia);
@@ -45,23 +23,17 @@
         iniciarExperiencia();
     }
 
-    // ============================================================================
-    // EXPERIÊNCIA 3D PROFISSIONAL DA ARCA
-    // ============================================================================
     function iniciarExperiencia() {
+        // =====================================
+        // CENA E CONFIGURAÇÃO VISUAL
+        // =====================================
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a252f); // Céu dramático de tempestade
-        scene.fog = new THREE.FogExp2(0x1a252f, 0.012);
+        scene.background = new THREE.Color(0xf1c40f); // Tom de entardecer dourado (combinando com a foto)
+        scene.fog = new THREE.FogExp2(0xf1c40f, 0.008);
 
-        const camera = new THREE.PerspectiveCamera(
-            40,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        camera.position.set(35, 18, 40);
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(45, 20, 50);
 
-        // Força a criação do container caso ele não exista no HTML
         let container = document.getElementById("canvas-container");
         if (!container) {
             container = document.createElement("div");
@@ -78,304 +50,286 @@
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true; // Sombra profissional ativada
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
-        renderer.toneMapping = THREE.ACESFilmicToneMapping; 
-        renderer.toneMappingExposure = 1.2;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
         container.appendChild(renderer.domElement);
 
-        // Controles de câmera totalmente calibrados para aproximar e girar
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.target.set(0, 3, 0);
-        controls.maxPolarAngle = Math.PI / 2 - 0.05; 
-        controls.minDistance = 2; // Permite entrar na cabine com zoom
-        controls.maxDistance = 90;
+        controls.target.set(0, 5, 0);
+        controls.maxPolarAngle = Math.PI / 2 - 0.02; // Evita entrar debaixo da terra
+        controls.minDistance = 5;
+        controls.maxDistance = 120;
 
-        // ============================================================================
-        // ILUMINAÇÃO CENOGRÁFICA
-        // ============================================================================
-        const sun = new THREE.DirectionalLight(0xffdfb0, 2.5);
-        sun.position.set(35, 45, 20);
+        // =====================================
+        // ILUMINAÇÃO (SOL DE OURO / GOLDEN HOUR)
+        // =====================================
+        const sun = new THREE.DirectionalLight(0xffe6a3, 3.0);
+        sun.position.set(40, 30, 25);
         sun.castShadow = true;
-        sun.shadow.mapSize.width = 2048; 
+        sun.shadow.mapSize.width = 2048;
         sun.shadow.mapSize.height = 2048;
-        sun.shadow.camera.near = 0.5;
-        sun.shadow.camera.far = 150;
-        const d = 40;
-        sun.shadow.camera.left = -d;
-        sun.shadow.camera.right = d;
-        sun.shadow.camera.top = d;
-        sun.shadow.camera.bottom = -d;
         sun.shadow.bias = -0.0005;
         scene.add(sun);
 
-        const ambient = new THREE.AmbientLight(0x2c3e50, 1.4);
+        const ambient = new THREE.AmbientLight(0xd35400, 1.2); // Sombra em tons de terracota quente
         scene.add(ambient);
 
-        const interiorLight = new THREE.PointLight(0xffa040, 3.5, 25);
-        interiorLight.position.set(0, 4, 0);
-        interiorLight.castShadow = true;
-        scene.add(interiorLight);
+        // Luzes internas para destacar o interior nos andares
+        const lights = [
+            new THREE.PointLight(0xffaa44, 3, 15),
+            new THREE.PointLight(0xffaa44, 3, 15),
+            new THREE.PointLight(0xffaa44, 3, 15)
+        ];
+        lights[0].position.set(0, 2.5, 5);
+        lights[1].position.set(0, 5.5, -5);
+        lights[2].position.set(0, 8.5, 0);
+        lights.forEach(l => scene.add(l));
 
-        // ============================================================================
-        // OCEANO REALISTA DINÂMICO
-        // ============================================================================
-        const waterGeometry = new THREE.PlaneGeometry(600, 600, 120, 120);
-        const waterMaterial = new THREE.MeshStandardMaterial({
-            color: 0x14344f,
-            roughness: 0.15,
-            metalness: 0.8,
-            flatShading: true
-        });
-        const water = new THREE.Mesh(waterGeometry, waterMaterial);
-        water.rotation.x = -Math.PI / 2;
-        water.receiveShadow = true;
-        scene.add(water);
+        // =====================================
+        // TERRENO E FUNDAÇÃO (IGUAL À FOTO)
+        // =====================================
+        const groundGeo = new THREE.PlaneGeometry(600, 600, 30, 30);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6, roughness: 0.9, flatShading: true });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        ground.receiveShadow = true;
+        scene.add(ground);
 
-        // ============================================================================
-        // MODELAGEM DA ARCA PROFISSIONAL
-        // ============================================================================
+        // Lago artificial ao lado (detalhe da foto)
+        const lakeGeo = new THREE.PlaneGeometry(80, 200);
+        const lakeMat = new THREE.MeshStandardMaterial({ color: 0x34495e, roughness: 0.1, metalness: 0.8 });
+        const lake = new THREE.Mesh(lakeGeo, lakeMat);
+        lake.rotation.x = -Math.PI / 2;
+        lake.position.set(-35, 0, 10);
+        scene.add(lake);
+
+        // =====================================
+        // MATERIAIS DE CONSTRUÇÃO DE MADEIRA
+        // =====================================
+        const woodDark = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.95, flatShading: true });
+        const woodMedium = new THREE.MeshStandardMaterial({ color: 0x8a5a36, roughness: 0.9, flatShading: true });
+        const woodLight = new THREE.MeshStandardMaterial({ color: 0xb5825c, roughness: 0.85, flatShading: true });
+        const concreteMat = new THREE.MeshStandardMaterial({ color: 0xbdc3c7, roughness: 0.9, flatShading: true });
+
+        // =====================================
+        // CONSTRUÇÃO ESTRUTURAL DA ARCA (ARK ENCOUNTER)
+        // =====================================
         const ark = new THREE.Group();
         scene.add(ark);
 
-        const matCasco = new THREE.MeshStandardMaterial({ color: 0x3d1d0c, roughness: 0.9, metalness: 0.1, flatShading: true });
-        const matVigas = new THREE.MeshStandardMaterial({ color: 0x271206, roughness: 0.9, metalness: 0.1, flatShading: true });
-        const matDeck = new THREE.MeshStandardMaterial({ color: 0x5e3719, roughness: 0.8, flatShading: true });
-        const matCabine = new THREE.MeshStandardMaterial({ color: 0x824b24, roughness: 0.75, flatShading: true, side: THREE.DoubleSide });
-        const matTelhado = new THREE.MeshStandardMaterial({ color: 0x4a1805, roughness: 0.9, flatShading: true });
-        const matGrade = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5, metalness: 0.8 });
+        // 1. PILARES DE CONCRETO DE SUSTENTAÇÃO (IGUAL À FOTO)
+        const pilares = new THREE.Group();
+        for (let z = -18; z <= 18; z += 3.5) {
+            const pilarL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3.5, 0.8), concreteMat);
+            pilarL.position.set(5, 1.75, z);
+            pilarL.castShadow = true;
+            pilarL.receiveShadow = true;
 
-        // Casco robusto com quilha
-        const hullGroup = new THREE.Group();
-        const hullCenter = new THREE.Mesh(new THREE.BoxGeometry(14, 8, 26), matCasco);
-        hullCenter.position.y = 4;
-        hullCenter.castShadow = true;
-        hullCenter.receiveShadow = true;
-        hullGroup.add(hullCenter);
+            const pilarR = pilarL.clone();
+            pilarR.position.x = -5;
+            pilares.add(pilarL, pilarR);
+        }
+        ark.add(pilares);
 
-        const bowGeo = new THREE.BoxGeometry(14, 8, 8);
-        const bow = new THREE.Mesh(bowGeo, matCasco);
-        bow.position.set(0, 4, 17);
-        bow.scale.set(0.1, 1, 1); // Bico frontal (proa)
-        bow.castShadow = true;
-        hullGroup.add(bow);
+        // Grupo principal do corpo do barco (começa a partir da fundação de madeira)
+        const boatBody = new THREE.Group();
+        boatBody.position.y = 3.5; // Fica suspenso sobre as colunas
+        ark.add(boatBody);
 
-        const sternGeo = new THREE.BoxGeometry(14, 8, 6);
-        const stern = new THREE.Mesh(sternGeo, matCasco);
-        stern.position.set(0, 4, -16);
-        stern.rotation.x = -0.2; // Traseira inclinada (popa)
+        // 2. CASCO BASE (RETANGULAR MONUMENTAL)
+        const hullMain = new THREE.Mesh(new THREE.BoxGeometry(11, 9, 36), woodDark);
+        hullMain.position.set(0, 4.5, 0);
+        hullMain.castShadow = true;
+        hullMain.receiveShadow = true;
+        boatBody.add(hullMain);
+
+        // 3. PROA EMBLEMÁTICA (CURVA VERTICAL IMPONENTE DA FOTO)
+        const proaGroup = new THREE.Group();
+        proaGroup.position.set(0, 0, 18);
+
+        // Quilha arqueada frontal
+        const bowShape = new THREE.Shape();
+        bowShape.moveTo(-5.5, 0);
+        bowShape.quadraticCurveTo(-5.5, 5, -1, 9);
+        bowShape.lineTo(0, 11); // Extensão vertical extra para a barbatana superior da foto
+        bowShape.lineTo(-3, 11);
+        bowShape.quadraticCurveTo(-7.5, 6, -7.5, 0);
+        bowShape.closePath();
+
+        const bowExtrude = new THREE.ExtrudeGeometry(bowShape, { depth: 11, bevelEnabled: false });
+        const bowMesh = new THREE.Mesh(bowExtrude, woodDark);
+        bowMesh.rotation.y = -Math.PI / 2;
+        bowMesh.position.set(-5.5, 0, 0);
+        bowMesh.castShadow = true;
+        proaGroup.add(bowMesh);
+        boatBody.add(proaGroup);
+
+        // 4. POPA QUADRADA (PARTE TRASEIRA)
+        const stern = new THREE.Mesh(new THREE.BoxGeometry(11, 9, 4), woodDark);
+        stern.position.set(0, 4.5, -20);
         stern.castShadow = true;
-        hullGroup.add(stern);
+        boatBody.add(stern);
 
-        // Vigas de reforço laterais
-        for (let z = -12; z <= 12; z += 4) {
-            const vigaL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 9, 0.6), matVigas);
-            vigaL.position.set(7.1, 4.2, z);
-            vigaL.rotation.z = -0.05;
-            vigaL.castShadow = true;
-            
-            const vigaR = vigaL.clone();
-            vigaR.position.x = -7.1;
-            vigaR.rotation.z = 0.05;
-            
-            hullGroup.add(vigaL, vigaR);
-        }
-        ark.add(hullGroup);
-
-        // Decks de madeira
-        const mainDeck = new THREE.Mesh(new THREE.BoxGeometry(14.8, 0.6, 42), matDeck);
-        mainDeck.position.set(0, 8, 0);
-        mainDeck.castShadow = true;
-        mainDeck.receiveShadow = true;
-        ark.add(mainDeck);
-
-        const innerDeck = new THREE.Mesh(new THREE.BoxGeometry(13, 0.3, 36), matDeck);
-        innerDeck.position.set(0, 3.8, 0);
-        innerDeck.receiveShadow = true;
-        ark.add(innerDeck);
-
-        // Cabine estruturada translúcida
-        const cabin = new THREE.Mesh(
-            new THREE.BoxGeometry(9.5, 6, 24),
-            new THREE.MeshStandardMaterial({
-                color: 0x824b24,
-                transparent: true,
-                opacity: 0.5,
-                side: THREE.DoubleSide,
-                roughness: 0.7,
-                flatShading: true
-            })
-        );
-        cabin.position.set(0, 11, 0);
-        cabin.castShadow = true;
-        cabin.receiveShadow = true;
-        ark.add(cabin);
-
-        // Colunas de madeira da cabine
-        for (let z = -11; z <= 11; z += 5.5) {
-            const colL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6.2, 0.4), matVigas);
-            colL.position.set(4.8, 11, z);
-            colL.castShadow = true;
-            const colR = colL.clone();
-            colR.position.x = -4.8;
-            ark.add(colL, colR);
-        }
-
-        // Telhado clássico
-        const roofGeo = new THREE.ConeGeometry(8.5, 4.5, 4);
-        const roof = new THREE.Mesh(roofGeo, matTelhado);
-        roof.rotation.y = Math.PI / 4;
-        roof.position.set(0, 16, 0);
+        // 5. TELHADO CONTÍNUO (COBERTURA TOTAL DA FOTO)
+        const roofGeo = new THREE.BoxGeometry(11.6, 1.2, 44);
+        const roof = new THREE.Mesh(roofGeo, woodMedium);
+        roof.position.set(0, 9.6, -1);
         roof.castShadow = true;
-        ark.add(roof);
+        boatBody.add(roof);
 
-        // Rampa de embarque detalhada
-        const rampa = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.3, 10), matDeck);
-        rampa.position.set(8.5, 4.2, 3);
-        rampa.rotation.z = -Math.PI / 6;
-        rampa.castShadow = true;
-        ark.add(rampa);
+        // 6. ANDARES INTERNOS (3 DECKS DISTINTOS)
+        const deck1 = new THREE.Mesh(new THREE.BoxGeometry(10.2, 0.25, 34), woodMedium);
+        deck1.position.set(0, 0.2, 0); // Térreo
+        boatBody.add(deck1);
 
-        const corrimaoL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.2, 10), matVigas);
-        corrimaoL.position.set(8.5, 4.9, 5.2);
-        corrimaoL.rotation.z = -Math.PI / 6;
-        corrimaoL.castShadow = true;
-        const corrimaoR = corrimaoL.clone();
-        corrimaoR.position.z = 0.8;
-        ark.add(corrimaoL, corrimaoR);
+        const deck2 = deck1.clone();
+        deck2.position.y = 3.2; // 2º Andar
+        boatBody.add(deck2);
 
-        // Janelas com grades
-        for (let i = -8; i <= 8; i += 4) {
-            if (i === 0) continue;
-            const frame = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.6, 1.2), matVigas);
-            frame.position.set(4.8, 11.2, i);
-            frame.castShadow = true;
-            ark.add(frame);
-            
-            const frameLeft = frame.clone();
-            frameLeft.position.x = -4.8;
-            ark.add(frameLeft);
+        const deck3 = deck1.clone();
+        deck3.position.y = 6.2; // 3º Andar
+        boatBody.add(deck3);
 
-            const grade = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.4, 0.1), matGrade);
-            grade.position.set(4.8, 11.2, i);
-            ark.add(grade);
-            const gradeL = grade.clone(); gradeL.position.x = -4.8;
-            ark.add(grade, gradeL);
+        // Colunas e vigas internas para suporte estrutural
+        for (let z = -14; z <= 14; z += 6) {
+            const coluna = new THREE.Mesh(new THREE.BoxGeometry(0.3, 9, 0.3), woodDark);
+            coluna.position.set(0, 4.5, z);
+            boatBody.add(coluna);
         }
 
-        // ============================================================================
-        // ANIMAIS REALISTAS (LOW-POLY PREMIUM)
-        // ============================================================================
+        // 7. PAREDE LATERAL DE CORTE INTERATIVO (MAGIA DA VISUALIZAÇÃO)
+        // Criamos uma parede lateral móvel que some quando a câmera está na direita (Z lateral)
+        const sideWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, 8.8, 35.8), woodLight);
+        sideWall.position.set(5.5, 4.5, 0);
+        sideWall.castShadow = true;
+        boatBody.add(sideWall);
+
+        // =====================================
+        // CRIAÇÃO E INSTALAÇÃO DE ANIMAIS
+        // =====================================
+
+        // 1. ELEFANTE (Novo!)
+        function createElephant() {
+            const elephant = new THREE.Group();
+            const gray = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, roughness: 0.9, flatShading: true });
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 1.6), gray);
+            body.position.y = 0.8;
+            elephant.add(body);
+
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), gray);
+            head.position.set(0, 1.1, 0.9);
+            elephant.add(head);
+
+            // Tromba
+            const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.2), gray);
+            trunk.position.set(0, 0.6, 1.3);
+            elephant.add(trunk);
+
+            // Pernas
+            const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
+            const legOffsets = [[-0.4, 0.35, 0.5], [0.4, 0.35, 0.5], [-0.4, 0.35, -0.5], [0.4, 0.35, -0.5]];
+            legOffsets.forEach(offset => {
+                const leg = new THREE.Mesh(legGeo, gray);
+                leg.position.set(...offset);
+                elephant.add(leg);
+            });
+
+            elephant.scale.set(0.7, 0.7, 0.7);
+            return elephant;
+        }
+
+        // 2. GIRAFA
         function createGiraffe() {
             const giraffe = new THREE.Group();
-            const matPele = new THREE.MeshStandardMaterial({ color: 0xD2912E, roughness: 0.8, flatShading: true });
-            const matManchas = new THREE.MeshStandardMaterial({ color: 0x6e3b19, roughness: 0.9 });
+            const yellow = new THREE.MeshStandardMaterial({ color: 0xd35400, roughness: 0.8, flatShading: true });
 
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 1.5), matPele);
-            body.position.y = 1.1;
-            body.castShadow = true;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 1.3), yellow);
+            body.position.y = 1;
             giraffe.add(body);
 
-            const mancha1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.3), matManchas);
-            mancha1.position.set(0.46, 1.2, 0.2);
-            const mancha2 = mancha1.clone();
-            mancha2.position.set(-0.46, 1.1, -0.3);
-            giraffe.add(mancha1, mancha2);
-
-            const neck = new THREE.Mesh(new THREE.BoxGeometry(0.26, 2.3, 0.26), matPele);
-            neck.position.set(0, 2.4, 0.5);
+            const neck = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.0, 0.22), yellow);
+            neck.position.set(0, 2.1, 0.4);
             neck.rotation.x = -0.15;
-            neck.castShadow = true;
             giraffe.add(neck);
 
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.6), matPele);
-            head.position.set(0, 3.4, 0.7);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 0.5), yellow);
+            head.position.set(0, 3.1, 0.6);
             giraffe.add(head);
 
-            const chifreL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.25, 0.06), matManchas);
-            chifreL.position.set(0.08, 3.65, 0.55);
-            const chifreR = chifreL.clone();
-            chifreR.position.x = -0.08;
-            giraffe.add(chifreL, chifreR);
-
-            const legGeo = new THREE.BoxGeometry(0.14, 1.4, 0.14);
-            const positions = [
-                [-0.32, 0.7, 0.55], [0.32, 0.7, 0.55],
-                [-0.32, 0.7, -0.55], [0.32, 0.7, -0.55]
-            ];
-            positions.forEach(pos => {
-                const leg = new THREE.Mesh(legGeo, matPele);
-                leg.position.set(...pos);
-                leg.castShadow = true;
+            const legGeo = new THREE.BoxGeometry(0.13, 1.2, 0.13);
+            const legOffsets = [[-0.28, 0.6, 0.45], [0.28, 0.6, 0.45], [-0.28, 0.6, -0.45], [0.28, 0.6, -0.45]];
+            legOffsets.forEach(offset => {
+                const leg = new THREE.Mesh(legGeo, yellow);
+                leg.position.set(...offset);
                 giraffe.add(leg);
             });
 
-            giraffe.scale.set(0.8, 0.8, 0.8);
+            giraffe.scale.set(0.6, 0.6, 0.6);
             return giraffe;
         }
 
+        // 3. OVELHA
         function createSheep() {
             const sheep = new THREE.Group();
-            const matLa = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.95, flatShading: true });
-            const matCara = new THREE.MeshStandardMaterial({ color: 0x1c1c1c, roughness: 0.9 });
+            const white = new THREE.MeshStandardMaterial({ color: 0xecf0f1, roughness: 0.95, flatShading: true });
+            const black = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9, flatShading: true });
 
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.95, 1.4), matLa);
-            body.position.y = 0.65;
-            body.castShadow = true;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 1.1), white);
+            body.position.y = 0.5;
             sheep.add(body);
 
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), matCara);
-            head.position.set(0, 0.85, 0.75);
-            head.castShadow = true;
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), black);
+            head.position.set(0, 0.7, 0.55);
             sheep.add(head);
 
-            const orelhaL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.35), matCara);
-            orelhaL.position.set(0.3, 0.85, 0.65);
-            orelhaL.rotation.z = -0.2;
-            const orelhaR = orelhaL.clone();
-            orelhaR.position.x = -0.3;
-            orelhaR.rotation.z = 0.2;
-            sheep.add(orelhaL, orelhaR);
-
-            const legGeo = new THREE.BoxGeometry(0.13, 0.6, 0.13);
-            const positions = [
-                [-0.35, 0.3, 0.45], [0.35, 0.3, 0.45],
-                [-0.35, 0.3, -0.45], [0.35, 0.3, -0.45]
-            ];
-            positions.forEach(pos => {
-                const leg = new THREE.Mesh(legGeo, matCara);
-                leg.position.set(...pos);
-                leg.castShadow = true;
+            const legGeo = new THREE.BoxGeometry(0.1, 0.4, 0.1);
+            const legOffsets = [[-0.25, 0.2, 0.35], [0.25, 0.2, 0.35], [-0.25, 0.2, -0.35], [0.25, 0.2, -0.35]];
+            legOffsets.forEach(offset => {
+                const leg = new THREE.Mesh(legGeo, black);
+                leg.position.set(...offset);
                 sheep.add(leg);
             });
 
-            sheep.scale.set(0.75, 0.75, 0.75);
+            sheep.scale.set(0.7, 0.7, 0.7);
             return sheep;
         }
 
         const animals = [];
 
-        const g1 = createGiraffe(); g1.position.set(2, 8.3, 11); g1.rotation.y = -0.5; ark.add(g1);
-        const g2 = createGiraffe(); g2.position.set(-2, 8.3, 13); g2.rotation.y = 0.6; ark.add(g2);
-        animals.push(g1, g2);
+        // 1º Andar (Elefantes)
+        const e1 = createElephant(); e1.position.set(1.5, 0.2, 5); e1.rotation.y = -Math.PI / 3; boatBody.add(e1);
+        const e2 = createElephant(); e2.position.set(-1.8, 0.2, -2); e2.rotation.y = Math.PI / 4; boatBody.add(e2);
+        animals.push(e1, e2);
 
-        const s1 = createSheep(); s1.position.set(1.5, 3.9, 6); s1.rotation.y = 1.2; ark.add(s1);
-        const s2 = createSheep(); s2.position.set(-1.8, 3.9, -1); s2.rotation.y = -0.4; ark.add(s2);
-        const s3 = createSheep(); s3.position.set(0, 3.9, -7); s3.rotation.y = Math.PI; ark.add(s3);
+        // 2º Andar (Ovelhas)
+        const s1 = createSheep(); s1.position.set(2, 3.2, 8); s1.rotation.y = Math.PI / 2; boatBody.add(s1);
+        const s2 = createSheep(); s2.position.set(-2, 3.2, 2); s2.rotation.y = -Math.PI / 6; boatBody.add(s2);
+        const s3 = createSheep(); s3.position.set(1, 3.2, -6); s3.rotation.y = Math.PI; boatBody.add(s3);
         animals.push(s1, s2, s3);
 
-        // ============================================================================
+        // 3º Andar (Girafas - pescoço se projeta para cima)
+        const g1 = createGiraffe(); g1.position.set(1.5, 6.2, 3); g1.rotation.y = -Math.PI / 4; boatBody.add(g1);
+        const g2 = createGiraffe(); g2.position.set(-1.5, 6.2, -5); g2.rotation.y = Math.PI / 3; boatBody.add(g2);
+        animals.push(g1, g2);
+
+
+        // =====================================
         // SISTEMA DE ÁUDIO REALISTA NATIVO
-        // ============================================================================
+        // =====================================
         let audioCtx = null;
 
         function initAudio() {
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            const bufferSize = audioCtx.sampleRate * 4;
+            // Som constante de vento/natureza
+            const bufferSize = audioCtx.sampleRate * 3;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
@@ -388,10 +342,10 @@
 
             const filter = audioCtx.createBiquadFilter();
             filter.type = 'lowpass';
-            filter.frequency.value = 220; 
+            filter.frequency.value = 280;
 
             const gainNode = audioCtx.createGain();
-            gainNode.gain.value = 0.09;
+            gainNode.gain.value = 0.08;
 
             whiteNoise.connect(filter);
             filter.connect(gainNode);
@@ -408,29 +362,17 @@
             const gain = audioCtx.createGain();
             
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(125, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(170, audioCtx.currentTime + 0.12);
-            osc.frequency.exponentialRampToValueAtTime(85, audioCtx.currentTime + 0.5);
+            osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(180, audioCtx.currentTime + 0.1);
+            osc.frequency.exponentialRampToValueAtTime(75, audioCtx.currentTime + 0.4);
 
-            const vibrato = audioCtx.createOscillator();
-            const vibratoGain = audioCtx.createGain();
-            vibrato.frequency.value = 16; 
-            vibratoGain.gain.value = 22; 
-
-            vibrato.connect(vibratoGain);
-            vibratoGain.connect(osc.frequency);
-            
-            gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
-            vibrato.start();
             osc.start();
-            
             osc.stop(audioCtx.currentTime + 0.5);
-            vibrato.stop(audioCtx.currentTime + 0.5);
         }
 
         window.addEventListener('click', () => {
@@ -444,29 +386,28 @@
             banner.style.bottom = "20px";
             banner.style.left = "50%";
             banner.style.transform = "translateX(-50%)";
-            banner.style.background = "rgba(10, 15, 25, 0.9)";
-            banner.style.color = "#2ecc71";
-            banner.style.border = "1px solid #2ecc71";
+            banner.style.background = "rgba(0,0,0,0.85)";
+            banner.style.color = "#fff";
             banner.style.padding = "10px 20px";
             banner.style.borderRadius = "20px";
             banner.style.fontFamily = "sans-serif";
             banner.style.fontSize = "13px";
             banner.style.pointerEvents = "none";
             banner.style.zIndex = "10000";
-            banner.innerHTML = "📢 Som Ativado! Clique no oceano para balir com os animais.";
+            banner.innerHTML = "📢 Sons de animais ativados! Clique no terreno para emitir sons.";
             document.body.appendChild(banner);
             setTimeout(() => banner.remove(), 4000);
         }
 
-        // Esconde a tela de carregamento de forma garantida
+        // Esconde a tela de carregamento de forma limpa
         const loadingElement = document.getElementById("loading");
         if (loadingElement) {
             loadingElement.style.display = "none";
         }
 
-        // ============================================================================
-        // LOOP DE ANIMAÇÃO
-        // ============================================================================
+        // =====================================
+        // LOOP DE ANIMAÇÃO E INTERAÇÃO DA PAREDE
+        // =====================================
         const clock = new THREE.Clock();
 
         function animate() {
@@ -475,22 +416,19 @@
             const time = clock.getElapsedTime();
             controls.update();
 
-            const position = water.geometry.attributes.position;
-            for (let i = 0; i < position.count; i++) {
-                const x = position.getX(i);
-                const y = position.getY(i);
-                const wave =
-                    Math.sin((x + time * 2.2) * 0.05) * 0.45 +
-                    Math.cos((y + time * 1.5) * 0.04) * 0.45;
-                position.setZ(i, wave);
+            // Lógica do Corte Lateral: Se o ângulo de órbita focar na lateral direita,
+            // removemos a parede para que você consiga olhar lá dentro perfeitamente.
+            if (camera.position.x > 5) {
+                sideWall.visible = false; // "Abre" a arca para visualização interna!
+            } else {
+                sideWall.visible = true;  // Fecha a parede para ver por fora!
             }
-            position.needsUpdate = true;
-            water.geometry.computeVertexNormals();
 
-            ark.position.y = Math.sin(time * 1.3) * 0.35; 
-            ark.rotation.z = Math.sin(time * 0.9) * 0.035; 
-            ark.rotation.x = Math.cos(time * 1.1) * 0.018; 
+            // Balanço realista (como se estivesse ancorada sobre vibrações sutis da terra/água)
+            ark.position.y = Math.sin(time * 0.8) * 0.1;
+            ark.rotation.z = Math.sin(time * 0.6) * 0.01;
 
+            // Movimento sutil dos animais
             animals.forEach((animal, index) => {
                 animal.rotation.y += Math.sin(time * 1.5 + index) * 0.0015;
             });
@@ -500,6 +438,7 @@
 
         animate();
 
+        // Ajuste de tamanho automático da tela
         window.addEventListener("resize", () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
