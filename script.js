@@ -1,5 +1,5 @@
-import * as THREE from "https://unpkg.com/three@0.150.0/build/three.module.js";
-import { OrbitControls } from "https://unpkg.com/three@0.150.0/examples/jsm/controls/OrbitControls.js";
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 // =====================================
 // CENA E RENDER
@@ -20,11 +20,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// Controles para olhar por dentro e por fora
+// Controles para olhar por dentro e por fora (OrbitControls)
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxPolarAngle = Math.PI / 2 - 0.05; // Evita que a câmera passe por baixo da água
+controls.maxPolarAngle = Math.PI / 2 - 0.05; // Impede que a câmera entre embaixo d'água
 controls.minDistance = 5;
 controls.maxDistance = 150;
 
@@ -56,7 +56,7 @@ scene.add(water);
 const ark = new THREE.Group();
 scene.add(ark);
 
-// CASCO DA ARCA (Corrigido e sem duplicatas)
+// CASCO DA ARCA (Corrigido: apenas uma declaração única e limpa)
 const hullShape = new THREE.Shape();
 hullShape.moveTo(-3.5, 0);
 hullShape.quadraticCurveTo(-7, 1, -7, 4);
@@ -85,7 +85,7 @@ hull.rotation.y = Math.PI;
 hull.position.set(0, 8, 17);
 ark.add(hull);
 
-// CONVÉS PRINCIPAL (Deck de cima)
+// CONVÉS SUPERIOR (Deck de cima)
 const deck = new THREE.Mesh(
     new THREE.BoxGeometry(12, 0.4, 40),
     new THREE.MeshPhongMaterial({ color: 0xC68642 })
@@ -93,7 +93,7 @@ const deck = new THREE.Mesh(
 deck.position.set(0, 7.25, 0);
 ark.add(deck);
 
-// CONVÉS INTERNO (Para ver os animais dentro da arca!)
+// CONVÉS INTERNO (Andar de dentro para colocar animais)
 const innerDeck = new THREE.Mesh(
     new THREE.BoxGeometry(10, 0.2, 36),
     new THREE.MeshPhongMaterial({ color: 0x5a3d1a })
@@ -101,13 +101,13 @@ const innerDeck = new THREE.Mesh(
 innerDeck.position.set(0, 3.5, 0);
 ark.add(innerDeck);
 
-// CABINE (Paredes semi-transparentes para ver o interior)
+// CABINE (Paredes translúcidas para dar visibilidade interna)
 const cabin = new THREE.Mesh(
     new THREE.BoxGeometry(8, 5, 24),
     new THREE.MeshPhongMaterial({
         color: 0x8A5A2B,
         transparent: true,
-        opacity: 0.65, // Torna o interior visível!
+        opacity: 0.65, // Deixa ver através da cabine!
         side: THREE.DoubleSide
     })
 );
@@ -140,83 +140,18 @@ for (let i = -8; i <= 8; i += 4) {
 // GERADOR DE ANIMAIS (LOW-POLY)
 // =====================================
 
-// 1. GIRAFA
+// Girafa
 function createGiraffe() {
     const giraffe = new THREE.Group();
     const yellow = new THREE.MeshPhongMaterial({ color: 0xD2912E });
-    const brown = new THREE.MeshPhongMaterial({ color: 0x5A3418 });
 
-    // Corpo
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 1.4), yellow);
     body.position.y = 1;
     giraffe.add(body);
 
-    // Pescoço
     const neck = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.8, 0.3), yellow);
     neck.position.set(0, 2.1, 0.5);
     neck.rotation.x = -0.2;
     giraffe.add(neck);
 
-    // Cabeça
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.6), yellow);
-    head.position.set(0, 3, 0.7);
-    giraffe.add(head);
-
-    // Pernas (4x)
-    const legGeo = new THREE.BoxGeometry(0.15, 1, 0.15);
-    const positions = [
-        [-0.3, 0.5, 0.5], [0.3, 0.5, 0.5],
-        [-0.3, 0.5, -0.5], [0.3, 0.5, -0.5]
-    ];
-    positions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeo, yellow);
-        leg.position.set(...pos);
-        giraffe.add(leg);
-    });
-
-    giraffe.scale.set(0.7, 0.7, 0.7);
-    return giraffe;
-}
-
-// 2. OVELHA
-function createSheep() {
-    const sheep = new THREE.Group();
-    const white = new THREE.MeshPhongMaterial({ color: 0xEEEEEE, flatShading: true });
-    const black = new THREE.MeshPhongMaterial({ color: 0x222222 });
-
-    // Corpo de lã
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 1), white);
-    body.position.y = 0.5;
-    sheep.add(body);
-
-    // Cabeça
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), black);
-    head.position.set(0, 0.7, 0.5);
-    sheep.add(head);
-
-    // Pernas
-    const legGeo = new THREE.BoxGeometry(0.1, 0.4, 0.1);
-    const positions = [
-        [-0.25, 0.2, 0.3], [0.25, 0.2, 0.3],
-        [-0.25, 0.2, -0.3], [0.25, 0.2, -0.3]
-    ];
-    positions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeo, black);
-        leg.position.set(...pos);
-        sheep.add(leg);
-    });
-
-    sheep.scale.set(0.8, 0.8, 0.8);
-    return sheep;
-}
-
-// Distribuir animais pela Arca
-const animals = [];
-
-// Animais no Deck de Cima (Ar livre)
-const g1 = createGiraffe(); g1.position.set(1.5, 7.5, 12); g1.rotation.y = -Math.PI/4; ark.add(g1);
-const g2 = createGiraffe(); g2.position.set(-1.5, 7.5, 10); g2.rotation.y = Math.PI/3; ark.add(g2);
-animals.push(g1, g2);
-
-// Animais no Deck Interno (Visíveis pelas paredes transparentes!)
-const s1 = createSheep(); s1.position.set(2, 3.6, 5); s1.rotation
