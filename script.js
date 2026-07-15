@@ -18,8 +18,8 @@ window.innerWidth / window.innerHeight,
 1000
 );
 
-camera.position.set(0, 18, 70);
-camera.lookAt(0, 7, 0);
+camera.position.set(45, 22, 45);
+camera.lookAt(0, 8, 0);
 
 // ===========================
 // RENDER
@@ -122,7 +122,7 @@ hullShape.quadraticCurveTo(7,1,3.5,0);
 hullShape.closePath();
 
 const hullGeometry = new THREE.ExtrudeGeometry(hullShape,{
-    depth:34,
+    depth:42,
     bevelEnabled:true,
     bevelThickness:0.2,
     bevelSize:0.2,
@@ -151,7 +151,7 @@ ark.add(hull);
 
 const deck = new THREE.Mesh(
 
-    new THREE.BoxGeometry(10.2,0.35,31),
+    new THREE.BoxGeometry(12,0.45,40),
 
     new THREE.MeshPhongMaterial({
         color:0xC68642
@@ -169,7 +169,7 @@ ark.add(deck);
 
 const cabin = new THREE.Mesh(
 
-    new THREE.BoxGeometry(4.5,3.2,11),
+    new THREE.BoxGeometry(6,4,15),
 
     new THREE.MeshPhongMaterial({
         color:0x8A5A2B
