@@ -10,7 +10,7 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-camera.position.set(45, 22, 45);
+camera.position.set(25, 15, 35); // Câmera inicializada mais perto para facilitar a visualização
 
 const container = document.getElementById("canvas-container") || document.body;
 
@@ -19,13 +19,14 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 container.appendChild(renderer.domElement);
 
-// Controles de órbita
+// Controles de órbita calibrados para permitir visualização externa e interna
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+controls.target.set(0, 5, 0); // Foca no centro da arca
 controls.maxPolarAngle = Math.PI / 2 - 0.05; 
-controls.minDistance = 5;
-controls.maxDistance = 150;
+controls.minDistance = 1; // DESTRAVADO: Permite que a câmera entre fisicamente nas cabines!
+controls.maxDistance = 100;
 
 // =====================================
 // LUZES
@@ -55,7 +56,7 @@ scene.add(water);
 const ark = new THREE.Group();
 scene.add(ark);
 
-// CASCO DA ARCA
+// CASCO DA ARCA (Ajustado no centro correto da física do grupo)
 const hullShape = new THREE.Shape();
 hullShape.moveTo(-3.5, 0);
 hullShape.quadraticCurveTo(-7, 1, -7, 4);
@@ -66,7 +67,7 @@ hullShape.quadraticCurveTo(7, 1, 3.5, 0);
 hullShape.closePath();
 
 const hullGeometry = new THREE.ExtrudeGeometry(hullShape, {
-    depth: 42,
+    depth: 30, // Proporção mais equilibrada para o barco
     bevelEnabled: true,
     bevelThickness: 0.2,
     bevelSize: 0.2,
@@ -81,53 +82,53 @@ const hullMaterial = new THREE.MeshPhongMaterial({
 const hull = new THREE.Mesh(hullGeometry, hullMaterial);
 hull.rotation.x = Math.PI;
 hull.rotation.y = Math.PI;
-hull.position.set(0, 8, 17);
+// Reposicionado no centro exato da arca (compensando o extrude que cresce em Z)
+hull.position.set(0, 8, 15); 
 ark.add(hull);
 
-// CONVÉS SUPERIOR
+// CONVÉS SUPERIOR (Deck)
 const deck = new THREE.Mesh(
-    new THREE.BoxGeometry(12, 0.4, 40),
+    new THREE.BoxGeometry(11.8, 0.4, 29.6),
     new THREE.MeshPhongMaterial({ color: 0xC68642 })
 );
-deck.position.set(0, 7.25, 0);
+deck.position.set(0, 7.8, 0);
 ark.add(deck);
 
-// CONVÉS INTERNO
+// CONVÉS INTERNO (Andar interno visível)
 const innerDeck = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 0.2, 36),
+    new THREE.BoxGeometry(10, 0.2, 28),
     new THREE.MeshPhongMaterial({ color: 0x5a3d1a })
 );
 innerDeck.position.set(0, 3.5, 0);
 ark.add(innerDeck);
 
-// CABINE TRANSLÚCIDA
+// CABINE TRANSLÚCIDA (Paredes)
 const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(8, 5, 24),
+    new THREE.BoxGeometry(8, 5, 18),
     new THREE.MeshPhongMaterial({
         color: 0x8A5A2B,
         transparent: true,
-        opacity: 0.65, 
+        opacity: 0.55, // Um pouco mais transparente para ver melhor por dentro
         side: THREE.DoubleSide
     })
 );
-cabin.position.set(0, 9.7, 0);
+cabin.position.set(0, 10.3, 0);
 ark.add(cabin);
 
 // TELHADO
-const roof = new THREE.Mesh(
-    new THREE.ConeGeometry(6, 3, 4),
-    new THREE.MeshPhongMaterial({ color: 0x5A3418 })
-);
+const roofGeometry = new THREE.ConeGeometry(6.5, 3, 4);
+const roofMaterial = new THREE.MeshPhongMaterial({ color: 0x5A3418 });
+const roof = new THREE.Mesh(roofGeometry, roofMaterial);
 roof.rotation.y = Math.PI / 4;
-roof.position.set(0, 13.5, 0);
+roof.position.set(0, 14.3, 0);
 ark.add(roof);
 
 // JANELAS DA CABINE
 const windowMaterial = new THREE.MeshPhongMaterial({ color: 0x111111, transparent: true, opacity: 0.8 });
-for (let i = -8; i <= 8; i += 4) {
+for (let i = -6; i <= 6; i += 3) {
     if (i === 0) continue;
     const windowBox = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.2, 0.8), windowMaterial);
-    windowBox.position.set(3.95, 10, i);
+    windowBox.position.set(3.95, 10.5, i);
     ark.add(windowBox);
     
     const windowBoxLeft = windowBox.clone();
@@ -201,15 +202,17 @@ function createSheep() {
     return sheep;
 }
 
-// Adicionar animais à arca
+// Posicionamento e Escala dos Animais
 const animals = [];
 
-const g1 = createGiraffe(); g1.position.set(1.5, 7.5, 12); g1.rotation.y = -Math.PI / 4; ark.add(g1);
-const g2 = createGiraffe(); g2.position.set(-1.5, 7.5, 10); g2.rotation.y = Math.PI / 3; ark.add(g2);
+// Girafas no Deck de cima
+const g1 = createGiraffe(); g1.position.set(1.5, 8, 10); g1.rotation.y = -Math.PI / 4; ark.add(g1);
+const g2 = createGiraffe(); g2.position.set(-1.5, 8, 11); g2.rotation.y = Math.PI / 3; ark.add(g2);
 animals.push(g1, g2);
 
-const s1 = createSheep(); s1.position.set(2, 3.6, 5); s1.rotation.y = Math.PI / 2; ark.add(s1);
-const s2 = createSheep(); s2.position.set(-2, 3.6, -2); s2.rotation.y = -Math.PI / 6; ark.add(s2);
+// Ovelhas no andar de dentro
+const s1 = createSheep(); s1.position.set(1.5, 3.6, 5); s1.rotation.y = Math.PI / 2; ark.add(s1);
+const s2 = createSheep(); s2.position.set(-1.5, 3.6, -2); s2.rotation.y = -Math.PI / 6; ark.add(s2);
 const s3 = createSheep(); s3.position.set(0, 3.6, -8); s3.rotation.y = Math.PI; ark.add(s3);
 animals.push(s1, s2, s3);
 
