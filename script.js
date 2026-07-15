@@ -40,15 +40,54 @@ color:0x1976d2
 water.rotation.x = -Math.PI/2;
 scene.add(water);
 
-// arca
-const ark = new THREE.Mesh(
-new THREE.BoxGeometry(10,3,30),
-new THREE.MeshPhongMaterial({
-color:0x8B4513
-})
+// Grupo da Arca
+const ark = new THREE.Group();
+
+// Casco
+const hull = new THREE.Mesh(
+    new THREE.BoxGeometry(12, 4, 34),
+    new THREE.MeshPhongMaterial({
+        color: 0x8B5A2B
+    })
 );
 
-ark.position.y = 2;
+hull.position.y = 2;
+ark.add(hull);
+
+// Convés
+const deck = new THREE.Mesh(
+    new THREE.BoxGeometry(11, 0.5, 30),
+    new THREE.MeshPhongMaterial({
+        color: 0xA66A2C
+    })
+);
+
+deck.position.y = 4.25;
+ark.add(deck);
+
+// Cabine
+const cabin = new THREE.Mesh(
+    new THREE.BoxGeometry(6,3,12),
+    new THREE.MeshPhongMaterial({
+        color:0x704214
+    })
+);
+
+cabin.position.set(0,6,0);
+ark.add(cabin);
+
+// Telhado
+const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(5,2,4),
+    new THREE.MeshPhongMaterial({
+        color:0x5D3A1A
+    })
+);
+
+roof.rotation.y=Math.PI/4;
+roof.position.y=8;
+ark.add(roof);
+
 scene.add(ark);
 
 // esconde texto
