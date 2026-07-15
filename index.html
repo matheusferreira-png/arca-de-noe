@@ -3,19 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Arca de Noé 3D</title>
 
 <link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
 
 </head>
 
 <body>
 
-<canvas id="renderCanvas"></canvas>
+<div id="loading">
+<h1>ARCA DE NOÉ</h1>
+<p>Carregando experiência 3D...</p>
+</div>
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
