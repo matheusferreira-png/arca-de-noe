@@ -12,12 +12,14 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(45, 22, 45);
 
+const container = document.getElementById("canvas-container") || document.body;
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
-// Controles de órbita ajustados para o modo global
+// Controles de órbita
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
