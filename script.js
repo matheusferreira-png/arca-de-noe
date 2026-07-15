@@ -1,35 +1,86 @@
+// =======================
+// ARCA DE NOÉ
+// =======================
+
 const ark = new THREE.Group();
 
-// Casco inferior
-const hullBottom = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 3, 34),
-    new THREE.MeshPhongMaterial({ color: 0x6D3F1C })
-);
-hullBottom.position.y = 1.5;
-ark.add(hullBottom);
+// Formato lateral do casco
+const hullShape = new THREE.Shape();
 
-// Casco superior
-const hullTop = new THREE.Mesh(
-    new THREE.BoxGeometry(12, 3, 30),
-    new THREE.MeshPhongMaterial({ color: 0x8B5A2B })
+hullShape.moveTo(-5,0);
+hullShape.lineTo(5,0);
+hullShape.lineTo(6,3);
+hullShape.lineTo(5,6);
+hullShape.lineTo(-5,6);
+hullShape.lineTo(-6,3);
+hullShape.closePath();
+
+// Extrusão
+const hullGeometry = new THREE.ExtrudeGeometry(hullShape,{
+    depth:30,
+    bevelEnabled:false
+});
+
+const hull = new THREE.Mesh(
+    hullGeometry,
+    new THREE.MeshPhongMaterial({
+        color:0x8B5A2B
+    })
 );
-hullTop.position.y = 4;
-ark.add(hullTop);
+
+hull.rotation.x = Math.PI;
+hull.rotation.y = Math.PI;
+hull.position.set(0,6,15);
+
+ark.add(hull);
 
 // Convés
+
 const deck = new THREE.Mesh(
-    new THREE.BoxGeometry(11.5, 0.4, 30),
-    new THREE.MeshPhongMaterial({ color: 0xB87333 })
+
+new THREE.BoxGeometry(10.5,0.3,30),
+
+new THREE.MeshPhongMaterial({
+    color:0xC68642
+})
+
 );
-deck.position.y = 5.7;
+
+deck.position.set(0,6.2,0);
+
 ark.add(deck);
 
 // Cabine
+
 const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(6, 3, 14),
-    new THREE.MeshPhongMaterial({ color: 0x80512F })
+
+new THREE.BoxGeometry(5,3,12),
+
+new THREE.MeshPhongMaterial({
+    color:0x704214
+})
+
 );
-cabin.position.y = 7.5;
+
+cabin.position.set(0,8,0);
+
 ark.add(cabin);
+
+// Telhado
+
+const roof = new THREE.Mesh(
+
+new THREE.ConeGeometry(4.3,2,4),
+
+new THREE.MeshPhongMaterial({
+    color:0x5D3A1A
+})
+
+);
+
+roof.rotation.y = Math.PI/4;
+roof.position.set(0,10,0);
+
+ark.add(roof);
 
 scene.add(ark);
