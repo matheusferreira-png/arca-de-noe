@@ -114,39 +114,6 @@ hull.position.set(0,8,17);
 
 ark.add(hull);
 
-hullShape.moveTo(-6,0);
-hullShape.lineTo(6,0);
-hullShape.lineTo(7,2);
-hullShape.lineTo(7,5);
-hullShape.lineTo(5.5,7);
-hullShape.lineTo(-5.5,7);
-hullShape.lineTo(-7,5);
-hullShape.lineTo(-7,2);
-hullShape.closePath();
-
-const hullGeometry = new THREE.ExtrudeGeometry(hullShape,{
-    depth:34,
-    bevelEnabled:true,
-    bevelThickness:0.25,
-    bevelSize:0.25,
-    bevelSegments:2
-});
-
-const hullMaterial = new THREE.MeshPhongMaterial({
-    color:0x7B4A21
-});
-
-const hull = new THREE.Mesh(
-    hullGeometry,
-    hullMaterial
-);
-
-hull.rotation.x = Math.PI;
-hull.rotation.y = Math.PI;
-hull.position.set(0,7,17);
-
-ark.add(hull);
-
 // =====================================
 // CONVÉS
 // =====================================
