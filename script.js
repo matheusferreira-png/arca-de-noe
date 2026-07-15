@@ -138,7 +138,6 @@ const hull = new THREE.Mesh(
     hullMaterial
 );
 
-// Centraliza
 hull.rotation.x = Math.PI;
 hull.rotation.y = Math.PI;
 
