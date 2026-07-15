@@ -1,75 +1,92 @@
-const canvas = document.getElementById("renderCanvas");
+import * as THREE from 'three';
 
-const engine = new BABYLON.Engine(canvas, true);
+const scene = new THREE.Scene();
 
-const createScene = function () {
+scene.background = new THREE.Color(0x87CEEB);
 
-    const scene = new BABYLON.Scene(engine);
+const camera = new THREE.PerspectiveCamera(
+60,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
 
-    scene.clearColor = new BABYLON.Color4(0.53,0.81,0.98,1);
+camera.position.set(0,8,18);
 
-    const camera = new BABYLON.ArcRotateCamera(
-        "camera",
-        Math.PI/2,
-        Math.PI/3,
-        150,
-        BABYLON.Vector3.Zero(),
-        scene
-    );
-
-    camera.attachControl(canvas,true);
-
-    const light = new BABYLON.HemisphericLight(
-        "light",
-        new BABYLON.Vector3(0,1,0),
-        scene
-    );
-
-    light.intensity = 1.3;
-
-    const ground = BABYLON.MeshBuilder.CreateGround(
-        "ground",
-        {
-            width:500,
-            height:500
-        },
-        scene
-    );
-
-    const water = new BABYLON.StandardMaterial("water",scene);
-
-    water.diffuseColor = new BABYLON.Color3(0,0.35,0.75);
-
-    ground.material = water;
-
-    const ark = BABYLON.MeshBuilder.CreateBox(
-        "ark",
-        {
-            width:35,
-            height:12,
-            depth:90
-        },
-        scene
-    );
-
-    ark.position.y = 6;
-
-    const wood = new BABYLON.StandardMaterial("wood",scene);
-
-    wood.diffuseColor = new BABYLON.Color3(0.45,0.28,0.10);
-
-    ark.material = wood;
-
-    return scene;
-
-};
-
-const scene = createScene();
-
-engine.runRenderLoop(function () {
-    scene.render();
+const renderer = new THREE.WebGLRenderer({
+antialias:true
 });
 
-window.addEventListener("resize",function(){
-    engine.resize();
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+document.body.appendChild(renderer.domElement);
+
+// Luz
+
+const light=new THREE.DirectionalLight(0xffffff,2);
+
+light.position.set(20,30,20);
+
+scene.add(light);
+
+scene.add(new THREE.AmbientLight(0xffffff,1));
+
+// Chão
+
+const floor=new THREE.Mesh(
+
+new THREE.PlaneGeometry(300,300),
+
+new THREE.MeshStandardMaterial({
+
+color:0x4ea5ff
+
+})
+
+);
+
+floor.rotation.x=-Math.PI/2;
+
+scene.add(floor);
+
+// Caixa temporária (será substituída pela Arca)
+
+const ark=new THREE.Mesh(
+
+new THREE.BoxGeometry(12,5,30),
+
+new THREE.MeshStandardMaterial({
+
+color:0x8b5a2b
+
+})
+
+);
+
+ark.position.y=2.5;
+
+scene.add(ark);
+
+function animate(){
+
+requestAnimationFrame(animate);
+
+ark.rotation.y+=0.002;
+
+renderer.render(scene,camera);
+
+}
+
+animate();
+
+window.addEventListener("resize",()=>{
+
+camera.aspect=window.innerWidth/window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(window.innerWidth,window.innerHeight);
+
 });
+
+document.getElementById("loading").style.display="none";
