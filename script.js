@@ -1,5 +1,21 @@
-import * as THREE from "https://unpkg.com/three@0.150.0/build/three.module.js";
-import { OrbitControls } from "https://unpkg.com/three@0.150.0/examples/jsm/controls/OrbitControls.js";
+// Usando CDNs robustos e compatíveis com o GitHub Pages
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/controls/OrbitControls.js";
+
+// Captura de erros para exibir na tela caso algo dê errado no seu celular/PC
+window.addEventListener('error', function(e) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '10px';
+    errorDiv.style.left = '10px';
+    errorDiv.style.background = 'rgba(255,0,0,0.9)';
+    errorDiv.style.color = 'white';
+    errorDiv.style.padding = '15px';
+    errorDiv.style.zIndex = '99999';
+    errorDiv.style.fontFamily = 'monospace';
+    errorDiv.innerHTML = '<b>Erro detectado:</b> ' + e.message;
+    document.body.appendChild(errorDiv);
+});
 
 // =====================================
 // CENA E RENDER
@@ -24,7 +40,7 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxPolarAngle = Math.PI / 2 - 0.05; // Impede de olhar por baixo d'água
+controls.maxPolarAngle = Math.PI / 2 - 0.05; 
 controls.minDistance = 5;
 controls.maxDistance = 150;
 
@@ -85,7 +101,7 @@ hull.rotation.y = Math.PI;
 hull.position.set(0, 8, 17);
 ark.add(hull);
 
-// CONVÉS SUPERIOR (Deck de cima)
+// CONVÉS SUPERIOR
 const deck = new THREE.Mesh(
     new THREE.BoxGeometry(12, 0.4, 40),
     new THREE.MeshPhongMaterial({ color: 0xC68642 })
@@ -159,195 +175,4 @@ function createGiraffe() {
     giraffe.add(head);
 
     const legGeo = new THREE.BoxGeometry(0.15, 1, 0.15);
-    const positions = [
-        [-0.3, 0.5, 0.5], [0.3, 0.5, 0.5],
-        [-0.3, 0.5, -0.5], [0.3, 0.5, -0.5]
-    ];
-    positions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeo, yellow);
-        leg.position.set(...pos);
-        giraffe.add(leg);
-    });
-
-    giraffe.scale.set(0.7, 0.7, 0.7);
-    return giraffe;
-}
-
-// Ovelha
-function createSheep() {
-    const sheep = new THREE.Group();
-    const white = new THREE.MeshPhongMaterial({ color: 0xEEEEEE, flatShading: true });
-    const black = new THREE.MeshPhongMaterial({ color: 0x222222 });
-
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 1), white);
-    body.position.y = 0.5;
-    sheep.add(body);
-
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), black);
-    head.position.set(0, 0.7, 0.5);
-    sheep.add(head);
-
-    const legGeo = new THREE.BoxGeometry(0.1, 0.4, 0.1);
-    const positions = [
-        [-0.25, 0.2, 0.3], [0.25, 0.2, 0.3],
-        [-0.25, 0.2, -0.3], [0.25, 0.2, -0.3]
-    ];
-    positions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeo, black);
-        leg.position.set(...pos);
-        sheep.add(leg);
-    });
-
-    sheep.scale.set(0.8, 0.8, 0.8);
-    return sheep;
-}
-
-// Adicionar animais à arca
-const animals = [];
-
-// Animais no convés superior
-const g1 = createGiraffe(); g1.position.set(1.5, 7.5, 12); g1.rotation.y = -Math.PI / 4; ark.add(g1);
-const g2 = createGiraffe(); g2.position.set(-1.5, 7.5, 10); g2.rotation.y = Math.PI / 3; ark.add(g2);
-animals.push(g1, g2);
-
-// Animais no convés interno
-const s1 = createSheep(); s1.position.set(2, 3.6, 5); s1.rotation.y = Math.PI / 2; ark.add(s1);
-const s2 = createSheep(); s2.position.set(-2, 3.6, -2); s2.rotation.y = -Math.PI / 6; ark.add(s2);
-const s3 = createSheep(); s3.position.set(0, 3.6, -8); s3.rotation.y = Math.PI; ark.add(s3);
-animals.push(s1, s2, s3);
-
-// =====================================
-// SISTEMA DE ÁUDIO NATIVO
-// =====================================
-let audioCtx = null;
-
-function initAudio() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    const bufferSize = audioCtx.sampleRate * 2;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
-
-    const whiteNoise = audioCtx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-    whiteNoise.loop = true;
-
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 350;
-
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.05;
-
-    whiteNoise.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    whiteNoise.start();
-
-    showAudioBanner();
-}
-
-function playAnimalSound() {
-    if (!audioCtx) return;
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.15);
-    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.4);
-
-    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.5);
-}
-
-window.addEventListener('click', () => {
-    initAudio();
-    playAnimalSound();
-});
-
-function showAudioBanner() {
-    const banner = document.createElement("div");
-    banner.style.position = "absolute";
-    banner.style.bottom = "20px";
-    banner.style.left = "50%";
-    banner.style.transform = "translateX(-50%)";
-    banner.style.background = "rgba(0,0,0,0.85)";
-    banner.style.color = "#fff";
-    banner.style.padding = "10px 20px";
-    banner.style.borderRadius = "20px";
-    banner.style.fontFamily = "sans-serif";
-    banner.style.fontSize = "14px";
-    banner.style.pointerEvents = "none";
-    banner.style.zIndex = "10000";
-    banner.innerHTML = "Som do mar ativado! Clique na tela para ouvir os animais.";
-    document.body.appendChild(banner);
-    setTimeout(() => banner.remove(), 4000);
-}
-
-// =====================================
-// OCULTAR CARREGAMENTO DE FORMA SEGURA
-// =====================================
-const loadingElement = document.getElementById("loading");
-if (loadingElement) {
-    loadingElement.style.display = "none";
-}
-
-// =====================================
-// ANIMAÇÃO
-// =====================================
-const clock = new THREE.Clock();
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    const time = clock.getElapsedTime();
-    controls.update();
-
-    // Ondas do oceano
-    const position = water.geometry.attributes.position;
-    for (let i = 0; i < position.count; i++) {
-        const x = position.getX(i);
-        const y = position.getY(i);
-        const wave =
-            Math.sin((x + time * 3) * 0.08) * 0.25 +
-            Math.cos((y + time * 2) * 0.08) * 0.25;
-        position.setZ(i, wave);
-    }
-    position.needsUpdate = true;
-    water.geometry.computeVertexNormals();
-
-    // Arca flutuando
-    ark.position.y = Math.sin(time * 1.5) * 0.35;
-    ark.rotation.z = Math.sin(time * 1.2) * 0.03;
-    ark.rotation.x = Math.cos(time * 1.5) * 0.015;
-
-    // Movimentação individual leve dos animais
-    animals.forEach((animal, index) => {
-        animal.rotation.y += Math.sin(time + index) * 0.003;
-    });
-
-    renderer.render(scene, camera);
-}
-
-animate();
-
-// =====================================
-// REDIMENSIONAMENTO
-// =====================================
-window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+    const positions =
